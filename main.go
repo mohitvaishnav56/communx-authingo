@@ -2,10 +2,19 @@ package main
 
 import (
 	"authService/app"
+	"fmt"
+	"os"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	cfg := app.NewConfig(":8080")
+	err := godotenv.Load()
+	if err != nil{
+		fmt.Println("error loading env")
+	}
+	addr := os.Getenv("PORT")
+	cfg := app.NewConfig(addr)
 	app := app.NewApplication(cfg)
 	app.Run()
 }
