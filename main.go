@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+	config.Load()
 	addr := config.GetString("PORT", ":8080")
 	cfg := app.NewConfig(addr)
 	app := app.NewApplication(cfg)
