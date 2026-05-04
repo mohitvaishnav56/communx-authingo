@@ -1,6 +1,10 @@
 package app
 
 import (
+	"authService/controllers"
+	db "authService/db/repositories"
+	"authService/router"
+	"authService/services"
 	"fmt"
 	"net/http"
 	"time"
@@ -8,6 +12,7 @@ import (
 
 type Config struct {
 	Addr string
+	storage db.Storage
 }
 type Application struct {
 	Config Config
@@ -26,10 +31,15 @@ func NewApplication(cfg Config) *Application {
 }
 
 func (app *Application) Run() error {
+	ur := db.NewUserRepository()
+	us := services.NewUserService(ur)
+	uc := controllers.NewUserController(us)
+	urouter := router.NewUserRouter(*uc)
+	
 	server := &http.Server{
 		Addr:         app.Config.Addr,
-		Handler:      nil, //To do Setup chi router here
-		ReadTimeout:  10 * time.Second,
+		Handler:      router.SetupRouter(urouter), //To do Setup chi router here
+		ReadTimeout:  10 * time.Second,	
 		WriteTimeout: 10 * time.Second,
 	}
 
