@@ -2,13 +2,15 @@ package main
 
 import (
 	"authService/app"
-	config "authService/config/env"
+	dbConfig "authService/config/db"
+	envConfig "authService/config/env"
 )
 
 func main() {
-	config.Load()
-	addr := config.GetString("PORT", ":8080")
+	envConfig.Load()
+	addr := envConfig.GetString("PORT", ":8080")
 	cfg := app.NewConfig(addr)
 	app := app.NewApplication(cfg)
+	dbConfig.SetupDB()
 	app.Run()
 }
