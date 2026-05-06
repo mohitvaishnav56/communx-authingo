@@ -10,7 +10,10 @@ func main() {
 	envConfig.Load()
 	addr := envConfig.GetString("PORT", ":8080")
 	cfg := app.NewConfig(addr)
-	app := app.NewApplication(cfg)
-	dbConfig.SetupDB()
+	db, err := dbConfig.SetupDB()
+	if err != nil {
+		panic(err)
+	}	
+	app := app.NewApplication(cfg, db)
 	app.Run()
 }
