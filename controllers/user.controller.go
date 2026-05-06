@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	// "fmt"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type UserController struct {
@@ -19,17 +21,61 @@ func NewUserController(_userService services.UserService) *UserController {
 }
 
 func (u *UserController) RegisterController(w http.ResponseWriter, r *http.Request) {
-	err := u.UserServices.CreateUser()
+	var payload struct {
+		Username string `json:"username"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	err := u.UserServices.CreateUser(payload.Username, payload.Email, payload.Password)
 	if err != nil {
-		// fmt.Println("Error while fetching data from userService")
 		http.Error(w, "User not created", http.StatusInternalServerError)
 		return
 	}
 	w.Write([]byte("user created successfully"))
 }
 
+func (u *UserController) LoginController(w http.ResponseWriter, r *http.Request) {
+	var payload struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	token, user, err := u.UserServices.LoginUser(payload.Email, payload.Password)
+	if err != nil {
+		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		return
+	}
+
+	response := map[string]interface{}{
+		"status":  http.StatusOK,
+		"message": "Login successful",
+		"token":   token,
+		"user":    user,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
 func (u *UserController) GetById(w http.ResponseWriter, r *http.Request) {
-	user, err := u.UserServices.GetById("4a6a9fb5-4897-11f1-8e38-7c2a318083c4")
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		http.Error(w, "Missing id parameter", http.StatusBadRequest)
+		return
+	}
+
+	user, err := u.UserServices.GetById(id)
 	if err != nil {
 		// fmt.Println("Error while fetching data from userService")
 		http.Error(w, "User Not Found", http.StatusNotFound)

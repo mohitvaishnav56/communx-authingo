@@ -13,5 +13,8 @@ func SetupRouter(userRouter Router) *chi.Mux{
 	chiRouter := chi.NewRouter()
 	chiRouter.Get("/ping", controllers.PingHandler)
 	userRouter.Register(chiRouter)
+	
+	SetupGatewayRoutes(chiRouter)
+	
 	return chiRouter
 }
