@@ -8,7 +8,8 @@ import (
 
 type UserService interface{
 	CreateUser() error
-	GetById(id string) (error, *model.User)
+	GetById(id string) ( *model.User, error)
+	GetAll() ([]*model.User, error)
 }
 
 type UserServiceImpl struct{
@@ -26,13 +27,20 @@ func NewUserService(_userRepository db.UserRepository) UserService{
 	}
 }
 
-func (u *UserServiceImpl) GetById(id string) (error, *model.User){
-	err, user := u.UserRepository.GetById(id)
+func (u *UserServiceImpl) GetById(id string) ( *model.User, error){
+	user, err:= u.UserRepository.GetById(id)
 	if err != nil {
 		// fmt.Println("Error while fetching data from userRepo")
-		return err, nil
+		return nil, err
 	}
 	
-	return nil, user
+	return user, nil
 }
 
+func(u *UserServiceImpl) GetAll() ([]*model.User, error){
+	users, err := u.UserRepository.GetAll()
+	if(err != nil){
+		return nil, err
+	}
+	return users, nil
+}

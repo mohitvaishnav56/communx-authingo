@@ -12,6 +12,7 @@ type UserRouter struct{
 func (ur UserRouter) Register(r chi.Router){
 	r.Post("/signup", ur.UserController.RegisterController)
 	r.Get("/get_by_id", ur.UserController.GetById)
+	r.Get("/get_all", ur.UserController.GetAll)
 }
 
 func NewUserRouter(_userController controllers.UserController) Router{
